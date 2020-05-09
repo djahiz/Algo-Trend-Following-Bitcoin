@@ -76,12 +76,17 @@ def algo_trading(db,cursor,cur_timestamp,price_up_open,price_down_open,price_up_
 			state['WaitCloseShort'] = True
 			state = result['state']
 			
-	new_state(db, cursor, (cur_timestamp, state['Long'], state['Short'], state['CloseConfirmation'], state['OpenPrice'], state['ClosePrice'], state['ExtremeValue'], state['Barrier'], state['WaitCloseLong'], state['WaitCloseShort']))
+	if state['Long']:
+		new_state(db, cursor, (cur_timestamp, state['Long'], state['Short'], state['CloseConfirmation'], state['OpenPrice'], state['ExtremeValue']*(1-MAX_LOSS), state['ExtremeValue'], state['Barrier'], state['WaitCloseLong'], state['WaitCloseShort']))
+	elif state['Short']:
+		new_state(db, cursor, (cur_timestamp, state['Long'], state['Short'], state['CloseConfirmation'], state['OpenPrice'], state['ExtremeValue']*(1+MAX_LOSS), state['ExtremeValue'], state['Barrier'], state['WaitCloseLong'], state['WaitCloseShort']))
+	else:
+		new_state(db, cursor, (cur_timestamp, state['Long'], state['Short'], state['CloseConfirmation'], state['OpenPrice'], state['ClosePrice'], state['ExtremeValue'], state['Barrier'], state['WaitCloseLong'], state['WaitCloseShort']))
 
 	print("Add to bot_state: time: "+ str(datetime.fromtimestamp(cur_timestamp)) +"; pos_long: "+str(state['Long'])+"; pos_short: "+str(state['Short'])+"; open_position: "+str(state['OpenPrice'])+"; close_position: "+str(state['ClosePrice'])+"; extreme: "+str(state['ExtremeValue'])+"; barrier: "+str(state['Barrier'])+"")
 
 	print("Current price " + str(close))
 	print("Price open long position: " + str(price_up_open))
 	print("Price open short position: " + str(price_down_open))
-	print("Price close long position: " + str(price_up_close))
-	print("Price close short position: " + str(price_down_close))
+	print("Price close long position: " + str(price_down_close))
+	print("Price close short position: " + str(price_up_close))

@@ -36,14 +36,14 @@ def get_last_time(cursor):
 
 def get_current_state(cursor):
 	try:
-		result = cursor.execute("SELECT LONG,SHORT,OPEN_PRICE,CLOSE_PRICE,EXTREME_VALUE,BARRIER FROM bot_state ORDER BY LAST_TIMESTAMP DESC LIMIT 1")
+		result = cursor.execute("SELECT LONG,SHORT,CLOSE_CONFIRMATION,OPEN_PRICE,CLOSE_PRICE,EXTREME_VALUE,BARRIER,WAIT_CLOSE_LONG,WAIT_CLOSE_SHORT FROM bot_state ORDER BY LAST_TIMESTAMP DESC LIMIT 1")
 	except Exception as e:
-		return {'Long': False, 'Short': False, 'OpenPrice': 0, 'ClosePrice': 0, 'ExtremeValue': 0, 'Barrier': False}
+		return {'Long': False, 'Short': False, 'CloseConfirmation': 0, 'OpenPrice': 0, 'ClosePrice': 0, 'ExtremeValue': 0, 'Barrier': False, 'WaitCloseLong': False, 'WaitCloseShort': False}
 	else:
 		result = result.fetchone()
 		if result == None:
-			return {'Long': False, 'Short': False, 'OpenPrice': 0, 'ClosePrice': 0, 'ExtremeValue': 0, 'Barrier': False}
-	return {'Long': result[0], 'Short': result[1], 'OpenPrice': result[2], 'ClosePrice': result[3], 'ExtremeValue': result[4], 'Barrier': result[5]}
+			return {'Long': False, 'Short': False, 'CloseConfirmation': 0, 'OpenPrice': 0, 'ClosePrice': 0, 'ExtremeValue': 0, 'Barrier': False, 'WaitCloseLong': False, 'WaitCloseShort': False}
+	return {'Long': result[0], 'Short': result[1], 'CloseConfirmation': result[2], 'OpenPrice': result[3], 'ClosePrice': result[4], 'ExtremeValue': result[5], 'Barrier': result[6], 'WaitCloseLong': result[7], 'WaitCloseShort': result[8]}
 
 def new_order(db, cursor, inputs):
 	try:
@@ -55,7 +55,7 @@ def new_order(db, cursor, inputs):
 
 def new_state(db, cursor, inputs):
 	try:
-		cursor.execute("INSERT INTO bot_state(LAST_TIMESTAMP,LONG,SHORT,OPEN_PRICE,CLOSE_PRICE,EXTREME_VALUE,BARRIER) VALUES (?,?,?,?,?,?,?)", inputs)
+		cursor.execute("INSERT INTO bot_state(LAST_TIMESTAMP,LONG,SHORT,CLOSE_CONFIRMATION,OPEN_PRICE,CLOSE_PRICE,EXTREME_VALUE,BARRIER,WAIT_CLOSE_LONG,WAIT_CLOSE_SHORT) VALUES (?,?,?,?,?,?,?,?,?,?)", inputs)
 		db.commit()
 	except Exception as e:
 		print_logs(LOG_ERROR, "An error occurred" + e.args[0])
