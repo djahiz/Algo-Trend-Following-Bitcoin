@@ -1,4 +1,3 @@
-import time
 from algo import *
 import pandas
 
@@ -42,7 +41,15 @@ while(1):
 			price_down_close = 0
 
 			if(count):
-				table = pandas.read_sql_query("SELECT CLOSE FROM data_btc ORDER BY LAST_TIMESTAMP DESC LIMIT " + str(max(SIZE_HISTO_OPEN,SIZE_HISTO_CLOSE)) + "", db)
+				get_data = False
+				while not get_data:
+					try:
+						table = pandas.read_sql_query("SELECT CLOSE FROM data_btc ORDER BY LAST_TIMESTAMP DESC LIMIT " + str(max(SIZE_HISTO_OPEN,SIZE_HISTO_CLOSE)) + "", db)
+					except Exception as e:
+						print_logs(LOG_ERROR, "An error occurred" + e.args[0])
+						pass
+					else:
+						get_data = True
 				moyenne_open = table.loc[:SIZE_HISTO_OPEN,'CLOSE'].mean()
 				moyenne_close = table.loc[:SIZE_HISTO_CLOSE,'CLOSE'].mean()
 				vol_open = table.loc[:SIZE_HISTO_OPEN,'CLOSE'].std()
@@ -53,7 +60,9 @@ while(1):
 				price_down_close = moyenne_close-SIZE_BANDE_CLOSE*vol_close
 
 			inputs = (current_time, arr[1], arr[2], arr[3], close, moyenne_open, moyenne_close, vol_open, vol_close, price_up_open, price_down_open, price_up_close, price_down_close, arr[6])
+			
 			new_data_row(db, cursor, inputs)
+			
 			print("Add to data_btc values for time: " + str(datetime.fromtimestamp(current_time)) + "")
 
 		if(count):
@@ -64,5 +73,7 @@ while(1):
 				pass
 			
 		time.sleep(SLEEP_TIME)
+
+input("Press any key...")
 
 db.close()
