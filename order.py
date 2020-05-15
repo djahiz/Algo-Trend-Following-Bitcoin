@@ -41,18 +41,18 @@ def add_order(db, cursor, cur_timestamp, type_order, way, currency, gain, state)
 			json = kraken.query_private('ClosedOrders')
 			order = json['result']['closed'][txid]
 			new_order(db, cursor, (cur_timestamp, type_order, way, float(order['price']), gain, float(order['cost']), float(order['fee']), float(order['vol'])))
-			message = way + " " + type_order + " order at time " + str(datetime.fromtimestamp(cur_timestamp)).replace(":"," ") + " and price " + str(order['price']) + " volume " + str(volume) + " " + str(currency)
+			message = way + " " + type_order + " order at time " + str(datetime.fromtimestamp(cur_timestamp)).replace(":"," ") + " and price " + str(order['price'])
 			print(message)
 			print_logs(LOG_ORDER, message)
 			for email in MAILING_LIST:
 				send_mail(MAIL_SERVER, MAIL_PORT, BOT_MAIL, BOT_PASSWD, email, message)
 			if way == "Open":
 				if type_order == "buy":
-					return {'error': False, 'state': {'Long': True, 'Short': False, 'CloseConfirmationLong': 0, 'CloseConfirmationShort': 0, 'OpenPrice': float(order['price']), 'ClosePrice': float(order['price'])*(1-MAX_LOSS), 'VolumeFiat': 0, 'VolumeCrypto': float(order['vol']), 'ExtremeValue': float(order['price']), 'BarrierLong': False, 'BarrierShort': False, 'WaitCloseLong': state['WaitCloseLong'], 'WaitCloseShort': state['WaitCloseShort']}}
+					return {'error': False, 'state': {'Long': True, 'Short': False, 'CloseConfirmationLong': 0, 'CloseConfirmationShort': 0, 'OpenPrice': float(order['price']), 'ClosePrice': float(order['price'])*(1-MAX_LOSS_LONG), 'VolumeFiat': 0, 'VolumeCrypto': float(order['vol']), 'ExtremeValue': float(order['price']), 'BarrierLong': False, 'BarrierShort': False, 'WaitCloseLong': False, 'WaitCloseShort': False}}
 				else:
-					return {'error': False, 'state': {'Long': False, 'Short': True, 'CloseConfirmationLong': 0, 'CloseConfirmationShort': 0, 'OpenPrice': float(order['price']), 'ClosePrice': float(order['price'])*(1+MAX_LOSS), 'VolumeFiat': float(order['cost']), 'VolumeCrypto': 0, 'ExtremeValue': float(order['price']), 'BarrierLong': False, 'BarrierShort': False, 'WaitCloseLong': state['WaitCloseLong'], 'WaitCloseShort': state['WaitCloseShort']}}
+					return {'error': False, 'state': {'Long': False, 'Short': True, 'CloseConfirmationLong': 0, 'CloseConfirmationShort': 0, 'OpenPrice': float(order['price']), 'ClosePrice': float(order['price'])*(1+MAX_LOSS_SHORT), 'VolumeFiat': float(order['cost']), 'VolumeCrypto': 0, 'ExtremeValue': float(order['price']), 'BarrierLong': False, 'BarrierShort': False, 'WaitCloseLong': False, 'WaitCloseShort': False}}
 			else:
-				return {'error': False, 'state': {'Long': False, 'Short': False, 'CloseConfirmationLong': 0, 'CloseConfirmationShort': 0, 'OpenPrice': 0, 'ClosePrice': 0, 'VolumeFiat': 0, 'VolumeCrypto': 0, 'ExtremeValue': 0, 'BarrierLong': False, 'BarrierShort': False, 'WaitCloseLong': state['WaitCloseLong'], 'WaitCloseShort': state['WaitCloseShort']}}
+				return {'error': False, 'state': {'Long': False, 'Short': False, 'CloseConfirmationLong': 0, 'CloseConfirmationShort': 0, 'OpenPrice': 0, 'ClosePrice': 0, 'VolumeFiat': 0, 'VolumeCrypto': 0, 'ExtremeValue': 0, 'BarrierLong': False, 'BarrierShort': False, 'WaitCloseLong': False, 'WaitCloseShort': False}}
 		else:
 			print_logs(LOG_ERROR, "An error occurred " + str(json['error']))
 			return {'error': True, 'state': state}

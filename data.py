@@ -35,6 +35,14 @@ def get_last_time(cursor):
 	else:
 		return cursor.fetchone()
 
+def get_histo_order(cursor):
+	try:
+		cursor.execute("SELECT * FROM data_order ORDER BY LAST_TIMESTAMP DESC LIMIT 10")
+	except Exception as e:
+		print_logs(LOG_ERROR, "An error occurred " + e.args[0])
+	else:
+		return cursor.fetchone()
+
 def get_current_state(cursor):
 	try:
 		result = cursor.execute("SELECT LONG,SHORT,CLOSE_CONFIRMATION_LONG,CLOSE_CONFIRMATION_SHORT,OPEN_PRICE,CLOSE_PRICE,VOLUME_FIAT,VOLUME_CRYPTO,EXTREME_VALUE,BARRIER_LONG,BARRIER_SHORT,WAIT_CLOSE_LONG,WAIT_CLOSE_SHORT FROM bot_state ORDER BY LAST_TIMESTAMP DESC LIMIT 1")
